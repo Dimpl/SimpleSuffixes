@@ -1,0 +1,29 @@
+name: SimpleSuffixes
+main: me.dimpl.SimpleSuffixes.SimpleSuffixes
+author: Dimpl
+version: 1.3.1
+description: Allows non-op players to set their own prefix/suffix through PEX.
+commands:
+  suffix:
+    description: Allows a player to set their own suffix.
+    aliases: [suf]
+  prefix:
+    description: Allows a player to set their own prefix.
+    aliases: [pre]
+  suffixr:
+    description: Allows someone to reset another player's suffix.
+    aliases: [sufr]
+  prefixr:
+    description: Allows someone to reset another player's prefix.
+    aliases: [prer]
+permissions:
+  simsuf.*:
+    default: op
+  simsuf.s:
+    description: Allows a player to set their own suffix.
+  simsuf.p:
+    description: Allows a player to set their own prefix.
+  simsuf.r:
+    description: Allows someone to reset another player's suffix/prefix.
+  simsuf.staff:
+    description: Allows someone to use a staff title in their suffix/prefix.

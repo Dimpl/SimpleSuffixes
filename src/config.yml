@@ -1,0 +1,7 @@
+suffix-cmd: pex user %P suffix " %M&f"
+prefix-cmd: pex user %P prefix "%M &f"
+suffix-max-length: 10
+prefix-max-length: 10
+allowed-regex: "&[^&] ( ) [ ] { } < >"
+word-blacklist: fag, queer, homo, gay, nigg, niglet, spic, jew, raghead, kyke, chink, bitch, cunt, %
+word-stafftags: admin, mod, erator, guard, mentor, init
