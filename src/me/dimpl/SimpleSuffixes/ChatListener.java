@@ -20,10 +20,22 @@ public class ChatListener implements Listener {
 	
 	@EventHandler
 	public void onPlayerChat(AsyncPlayerChatEvent event) {
-		//if plugin enabled, set block type
-		for(Player p: Bukkit.getOnlinePlayers())
-		if(plugin.isFollowing(p, event.getPlayer()))
-			/*FOR P*/event.setMessage(ChatColor.DARK_GREEN + "[" + ChatColor.AQUA + "FOLLOWED" + ChatColor.DARK_GREEN + "]" + ChatColor.BOLD + event.getMessage());
+		if(!event.getMessage().contains("[FOLLOWED]")) {
+			//Only send to players not following
+			for(Player p:Bukkit.getOnlinePlayers()) {
+				if(SimpleSuffixes.Following.get(p).contains(event.getPlayer()))
+					event.getRecipients().remove(p);
+			}
+			//send elevated message
+			event.getPlayer().chat(ChatColor.DARK_GREEN + "[" + ChatColor.AQUA + "FOLLOWED" + ChatColor.DARK_GREEN + "]" + ChatColor.BOLD + event.getMessage());
+		}
+		else {
+			event.getRecipients().clear();
+			for(Player p:Bukkit.getOnlinePlayers()) {
+				if(SimpleSuffixes.Following.get(p).contains(event.getPlayer()))
+					event.getRecipients().add(p);
+			}
+		}
 	}
 	
 	@EventHandler
