@@ -30,7 +30,7 @@ public class SimpleSuffixes extends JavaPlugin {
 	public String[] wordStafftags;
 	public String wordStafftagsString;
 	private final ChatListener chatListener = new ChatListener(this);
-	public static HashMap<Player, List<Player>> Following = new HashMap<Player, List<Player>>();
+	public static HashMap<Player, List<Player>> FollowedBy = new HashMap<Player, List<Player>>();
 	String RED = ChatColor.RED.toString();
 	
 	CommandSender Console;
@@ -96,20 +96,21 @@ public class SimpleSuffixes extends JavaPlugin {
 				return false;
 			}
 			
-			Player player = getServer().getPlayer(args[0]);
-			if (player == null) {
+			Player p1 = getServer().getPlayer(args[0]);
+			Player p2 = (Player) sender;
+			if (p1 == null) {
 				sender.sendMessage(RED + "This player is offline.");				
 				return false;
 			}
 			//toggle on
-			if (!isFollowing((Player) sender, player)) {
-				Following.get((Player) sender).add(player);
-				sender.sendMessage(ChatColor.DARK_GREEN + "You are now following" + player);
+			if (!isFollowedBy(p1, p2)) {
+				FollowedBy.get(p1).add(p2);
+				sender.sendMessage(ChatColor.DARK_GREEN + "You are now following " + p1.getDisplayName());
 			}
 			//toggle off
 			else {
-				Following.get((Player) sender).remove(player);
-				sender.sendMessage(ChatColor.BLUE + "You are no longer following" + player);
+				FollowedBy.get(p1).remove(p2);
+				sender.sendMessage(ChatColor.BLUE + "You are no longer following " + p1.getDisplayName());
 			}
 			return false;
 		}
@@ -118,16 +119,17 @@ public class SimpleSuffixes extends JavaPlugin {
 				sender.sendMessage(RED + "This command cannot be executed from the console.");				
 				return false;
 			}
-			if (!Following.get(sender).isEmpty()) {
-				StringBuilder following = new StringBuilder();
-				following.append(ChatColor.GOLD + "You are following" + ChatColor.AQUA);
-				for (Player p : Following.get(sender))
-					following.append(" " + p.getDisplayName() + ",");
-				following.deleteCharAt(following.length()-1);
-				sender.sendMessage(following.toString());
-				return true;
+			Player p2 = (Player) sender;
+			StringBuilder following = new StringBuilder();
+			following.append(ChatColor.GOLD + "You are following" + ChatColor.AQUA);
+			for (Player p1 : Bukkit.getOnlinePlayers()) {
+				if (isFollowedBy(p1, p2))
+					following.append(" " + p1.getDisplayName() + ",");
 			}
-			else sender.sendMessage(RED + "You are not following anyone.");
+			if (following.charAt(following.length()-1) == ':')
+				following.append(" nobody.");
+			else following.replace(following.length()-1, following.length(), ".");
+			sender.sendMessage(following.toString());
 			return true;
 		}
 		
@@ -147,9 +149,6 @@ public class SimpleSuffixes extends JavaPlugin {
 			if (args.length == 0) {
 				sender.sendMessage(RED + "Please specify a " + type + "fix.");
 				return false;
-			}
-			else if(args.length >= 2) {
-				sender.sendMessage(RED + "The suffix must be all 1 word.");
 			}
 			
 			//String[] --> String
@@ -228,20 +227,20 @@ public class SimpleSuffixes extends JavaPlugin {
 		return allowed.length();
 	}
 	
-	public boolean isFollowing(Player sender, Player player) {
-		return Following.get(sender).contains(player);
+	public boolean isFollowedBy(Player p1, Player p2) {
+		return FollowedBy.get(p1).contains(p2);
 	}
 	
-	public void createFollowing(Player sender) {
-		Following.put(sender, new ArrayList<Player>());
+	public void createFollowedBy(Player p1) {
+		FollowedBy.put(p1, new ArrayList<Player>());
 	}
 	
-	public void removeFollowing(Player sender) {
-		Following.remove(sender);
-		for(Player p:Bukkit.getOnlinePlayers()) {
-			if(Following.get(p).contains(sender))
-				Following.get(p).remove(sender);
+	public void removeFollowedBy(Player p2) {
+		for(Player p1:Bukkit.getOnlinePlayers()) {
+			if(FollowedBy.get(p1).contains(p2))
+				FollowedBy.get(p1).remove(p2);
 		}
+		FollowedBy.remove(p2);
 	}
 	
 }
