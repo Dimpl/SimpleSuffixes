@@ -30,7 +30,7 @@ public class SimpleSuffixes extends JavaPlugin {
 	public String[] wordStafftags;
 	public String wordStafftagsString;
 	private final ChatListener chatListener = new ChatListener(this);
-	public static HashMap<Player, List<Player>> FollowedBy = new HashMap<Player, List<Player>>();
+	public static HashMap<Player, List<Player>> ListenedToBy = new HashMap<Player, List<Player>>();
 	String RED = ChatColor.RED.toString();
 	
 	CommandSender Console;
@@ -81,13 +81,13 @@ public class SimpleSuffixes extends JavaPlugin {
 			return onCommandDo(sender, args, "prer", prefixCmd, 0);
 		}
 		
-		else if (cmd.getName().equals("follow")) {
+		else if (cmd.getName().equals("listen")) {
 			if (sender.getName() == "CONSOLE") {
 				sender.sendMessage(RED + "This command cannot be executed from the console.");				
 				return false;
 			}
 			if (args.length == 0) {
-				sender.sendMessage(RED + "Please specify a player to follow.");
+				sender.sendMessage(RED + "Please specify a player to listen to.");
 				return false;
 			}
 			
@@ -103,33 +103,33 @@ public class SimpleSuffixes extends JavaPlugin {
 				return false;
 			}
 			//toggle on
-			if (!isFollowedBy(p1, p2)) {
-				FollowedBy.get(p1).add(p2);
-				sender.sendMessage(ChatColor.DARK_GREEN + "You are now following " + p1.getDisplayName());
+			if (!isListenedToBy(p1, p2)) {
+				ListenedToBy.get(p1).add(p2);
+				sender.sendMessage(ChatColor.DARK_GREEN + "You are now listening to " + p1.getDisplayName() + ".");
 			}
 			//toggle off
 			else {
-				FollowedBy.get(p1).remove(p2);
-				sender.sendMessage(ChatColor.BLUE + "You are no longer following " + p1.getDisplayName());
+				ListenedToBy.get(p1).remove(p2);
+				sender.sendMessage(ChatColor.BLUE + "You are no longer listening to " + p1.getDisplayName() + ".");
 			}
 			return false;
 		}
-		else if (cmd.getName().equals("following")) {
+		else if (cmd.getName().equals("listening")) {
 			if (sender.getName() == "CONSOLE") {
 				sender.sendMessage(RED + "This command cannot be executed from the console.");				
 				return false;
 			}
 			Player p2 = (Player) sender;
-			StringBuilder following = new StringBuilder();
-			following.append(ChatColor.GOLD + "You are following" + ChatColor.AQUA);
+			StringBuilder listening = new StringBuilder();
+			listening.append(ChatColor.GOLD + "You are listening to " + ChatColor.AQUA);
 			for (Player p1 : Bukkit.getOnlinePlayers()) {
-				if (isFollowedBy(p1, p2))
-					following.append(" " + p1.getDisplayName() + ",");
+				if (isListenedToBy(p1, p2))
+					listening.append(" " + p1.getDisplayName() + ",");
 			}
-			if (following.charAt(following.length()-1) == ':')
-				following.append(" nobody.");
-			else following.replace(following.length()-1, following.length(), ".");
-			sender.sendMessage(following.toString());
+			if (listening.charAt(listening.length()-1) == ':')
+				listening.append(" nobody.");
+			else listening.replace(listening.length()-1, listening.length(), ".");
+			sender.sendMessage(listening.toString());
 			return true;
 		}
 		
@@ -227,20 +227,20 @@ public class SimpleSuffixes extends JavaPlugin {
 		return allowed.length();
 	}
 	
-	public boolean isFollowedBy(Player p1, Player p2) {
-		return FollowedBy.get(p1).contains(p2);
+	public boolean isListenedToBy(Player p1, Player p2) {
+		return ListenedToBy.get(p1).contains(p2);
 	}
 	
-	public void createFollowedBy(Player p1) {
-		FollowedBy.put(p1, new ArrayList<Player>());
+	public void createListenedToBy(Player p1) {
+		ListenedToBy.put(p1, new ArrayList<Player>());
 	}
 	
-	public void removeFollowedBy(Player p2) {
+	public void removeListenedToBy(Player p2) {
 		for(Player p1:Bukkit.getOnlinePlayers()) {
-			if(FollowedBy.get(p1).contains(p2))
-				FollowedBy.get(p1).remove(p2);
+			if(ListenedToBy.get(p1).contains(p2))
+				ListenedToBy.get(p1).remove(p2);
 		}
-		FollowedBy.remove(p2);
+		ListenedToBy.remove(p2);
 	}
 	
 }

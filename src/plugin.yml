@@ -1,7 +1,7 @@
 name: SimpleSuffixes
 main: me.dimpl.SimpleSuffixes.SimpleSuffixes
 author: Dimpl
-version: 1.3.1
+version: 1.4.1
 description: Allows non-op players to set their own prefix/suffix through PEX.
 commands:
   suffix:
@@ -16,10 +16,10 @@ commands:
   prefixr:
     description: Allows someone to reset another player's prefix.
     aliases: [prer]
-  follow:
-    description: Toggles following another player, emboldening their chat.
-  following:
-    description: Lists the players being followed.
+  listen:
+    description: Toggles listening to another player, emboldening and colouring their chat.
+  listening:
+    description: Lists the players being listened to.
 permissions:
   simsuf.*:
     default: op
