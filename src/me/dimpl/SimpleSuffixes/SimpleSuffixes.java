@@ -2,6 +2,7 @@ package me.dimpl.SimpleSuffixes;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -29,7 +30,7 @@ public class SimpleSuffixes extends JavaPlugin {
 	public String[] wordStafftags;
 	public String wordStafftagsString;
 	private final ChatListener chatListener = new ChatListener(this);
-	public final List<Player> Following = new ArrayList<Player>();
+	public static HashMap<Player, List<Player>> Following = new HashMap<Player, List<Player>>();
 	String RED = ChatColor.RED.toString();
 	
 	CommandSender Console;
@@ -101,13 +102,13 @@ public class SimpleSuffixes extends JavaPlugin {
 				return false;
 			}
 			//toggle on
-			if (/*the sender*/!isFollowing(player)) {
-				/*for the sender*/Following.add(player);
+			if (!isFollowing((Player) sender, player)) {
+				Following.get((Player) sender).add(player);
 				sender.sendMessage(ChatColor.DARK_GREEN + "You are now following" + player);
 			}
 			//toggle off
 			else {
-				/*for the sender*/Following.remove((Player) sender);
+				Following.get((Player) sender).remove(player);
 				sender.sendMessage(ChatColor.BLUE + "You are no longer following" + player);
 			}
 			return false;
@@ -117,10 +118,10 @@ public class SimpleSuffixes extends JavaPlugin {
 				sender.sendMessage(RED + "This command cannot be executed from the console.");				
 				return false;
 			}
-			if (/*the sender's*/!Following.isEmpty()) {
+			if (!Following.get(sender).isEmpty()) {
 				StringBuilder following = new StringBuilder();
 				following.append(ChatColor.GOLD + "You are following" + ChatColor.AQUA);
-				for (Player p : /*the sender's*/Following)
+				for (Player p : Following.get(sender))
 					following.append(" " + p.getDisplayName() + ",");
 				following.deleteCharAt(following.length()-1);
 				sender.sendMessage(following.toString());
@@ -227,12 +228,20 @@ public class SimpleSuffixes extends JavaPlugin {
 		return allowed.length();
 	}
 	
-	public boolean isFollowing(Player player) {
-		return Following.contains(player);
+	public boolean isFollowing(Player sender, Player player) {
+		return Following.get(sender).contains(player);
 	}
 	
-	public void stopFollowing(Player player) {
-		Following.remove(player);
+	public void createFollowing(Player sender) {
+		Following.put(sender, new ArrayList<Player>());
+	}
+	
+	public void removeFollowing(Player sender) {
+		Following.remove(sender);
+		for(Player p:Bukkit.getOnlinePlayers()) {
+			if(Following.get(p).contains(sender))
+				Following.get(p).remove(sender);
+		}
 	}
 	
 }
