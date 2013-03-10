@@ -1,6 +1,8 @@
 package me.dimpl.SimpleSuffixes;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.WordUtils;
@@ -10,6 +12,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class SimpleSuffixes extends JavaPlugin {
@@ -25,6 +28,8 @@ public class SimpleSuffixes extends JavaPlugin {
 	public String wordBlacklistString;
 	public String[] wordStafftags;
 	public String wordStafftagsString;
+	private final ChatListener chatListener = new ChatListener(this);
+	public final List<Player> Following = new ArrayList<Player>();
 	String RED = ChatColor.RED.toString();
 	
 	CommandSender Console;
@@ -45,6 +50,9 @@ public class SimpleSuffixes extends JavaPlugin {
 		wordBlacklist = wordBlacklistString.split(", ");
 		wordStafftagsString = this.getConfig().getString("word-stafftags");
 		wordStafftags = wordStafftagsString.split(", ");
+		//set up listener
+		PluginManager pm = getServer().getPluginManager();
+		pm.registerEvents(chatListener, this);
 		this.log.info(pdffile.getName() + " version " + pdffile.getVersion() + " is enabled.");
 	}
 	
@@ -72,6 +80,60 @@ public class SimpleSuffixes extends JavaPlugin {
 			return onCommandDo(sender, args, "prer", prefixCmd, 0);
 		}
 		
+		else if (cmd.getName().equals("follow")) {
+			if (sender.getName() == "CONSOLE") {
+				sender.sendMessage(RED + "This command cannot be executed from the console.");				
+				return false;
+			}
+			if (args.length == 0) {
+				sender.sendMessage(RED + "Please specify a player to follow.");
+				return false;
+			}
+			
+			else if (args.length >= 2) {
+				sender.sendMessage(RED + "Too many args.");
+				return false;
+			}
+			
+			Player player = getServer().getPlayer(args[0]);
+			if (player == null) {
+				sender.sendMessage(RED + "This player is offline.");				
+				return false;
+			}
+			//toggle on
+			if (/*the sender*/!isFollowing(player)) {
+				/*for the sender*/Following.add(player);
+				sender.sendMessage(ChatColor.DARK_GREEN + "You are now following" + player);
+			}
+			//toggle off
+			else {
+				/*for the sender*/Following.remove((Player) sender);
+				sender.sendMessage(ChatColor.BLUE + "You are no longer following" + player);
+			}
+			return false;
+		}
+		else if (cmd.getName().equals("following")) {
+			if (sender.getName() == "CONSOLE") {
+				sender.sendMessage(RED + "This command cannot be executed from the console.");				
+				return false;
+			}
+			
+			if(args.length >= 2) {
+				sender.sendMessage(RED + "Too many args.");				
+				return false;
+			}
+			else if(args.length == 1) {
+				Player player = getServer().getPlayer(args[0]);
+				if (player == null) {
+					sender.sendMessage(RED + "This player is offline.");				
+					return false;
+				}
+				
+			}
+			
+			return false;
+		}
+		
 		else return false;	
 	}
 	
@@ -88,6 +150,9 @@ public class SimpleSuffixes extends JavaPlugin {
 			if (args.length == 0) {
 				sender.sendMessage(RED + "Please specify a " + type + "fix.");
 				return false;
+			}
+			else if(args.length >= 2) {
+				sender.sendMessage(RED + "The suffix must be all 1 word.");
 			}
 			
 			//String[] --> String
@@ -127,7 +192,7 @@ public class SimpleSuffixes extends JavaPlugin {
 				sender.sendMessage(RED + "Please specify a player.");
 				return false;
 			}
-			else if (args.length > 1) {
+			else if (args.length >= 2) {
 				sender.sendMessage(RED + "Too many args.");
 				return false;
 			}
@@ -164,6 +229,14 @@ public class SimpleSuffixes extends JavaPlugin {
 			}
 		}
 		return allowed.length();
+	}
+	
+	public boolean isFollowing(Player player) {
+		return Following.contains(player);
+	}
+	
+	public void stopFollowing(Player player) {
+		Following.remove(player);
 	}
 	
 }
