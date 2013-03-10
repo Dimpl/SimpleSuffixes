@@ -117,21 +117,17 @@ public class SimpleSuffixes extends JavaPlugin {
 				sender.sendMessage(RED + "This command cannot be executed from the console.");				
 				return false;
 			}
-			
-			if(args.length >= 2) {
-				sender.sendMessage(RED + "Too many args.");				
-				return false;
+			if (/*the sender's*/!Following.isEmpty()) {
+				StringBuilder following = new StringBuilder();
+				following.append(ChatColor.GOLD + "You are following" + ChatColor.AQUA);
+				for (Player p : /*the sender's*/Following)
+					following.append(" " + p.getDisplayName() + ",");
+				following.deleteCharAt(following.length()-1);
+				sender.sendMessage(following.toString());
+				return true;
 			}
-			else if(args.length == 1) {
-				Player player = getServer().getPlayer(args[0]);
-				if (player == null) {
-					sender.sendMessage(RED + "This player is offline.");				
-					return false;
-				}
-				
-			}
-			
-			return false;
+			else sender.sendMessage(RED + "You are not following anyone.");
+			return true;
 		}
 		
 		else return false;	

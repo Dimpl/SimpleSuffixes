@@ -16,6 +16,10 @@ commands:
   prefixr:
     description: Allows someone to reset another player's prefix.
     aliases: [prer]
+  follow:
+    description: Toggles following another player, emboldening their chat.
+  following:
+    description: Lists the players being followed.
 permissions:
   simsuf.*:
     default: op
