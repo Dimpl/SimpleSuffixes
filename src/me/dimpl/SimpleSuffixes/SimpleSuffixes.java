@@ -55,6 +55,11 @@ public class SimpleSuffixes extends JavaPlugin {
 		PluginManager pm = getServer().getPluginManager();
 		pm.registerEvents(chatListener, this);
 		this.log.info(pdffile.getName() + " version " + pdffile.getVersion() + " is enabled.");
+		
+		for (Player player : getServer().getOnlinePlayers())
+		{
+			createListenedToBy(player);
+		}
 	}
 	
 	@Override
@@ -62,6 +67,7 @@ public class SimpleSuffixes extends JavaPlugin {
 		//plugin disabled
 		PluginDescriptionFile pdffile = this.getDescription();
 		this.log.info(pdffile.getName() + " is now disabled.");
+		ListenedToBy.clear();
 	}
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
