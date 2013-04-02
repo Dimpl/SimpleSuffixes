@@ -18,8 +18,10 @@ commands:
     aliases: [prer]
   listen:
     description: Toggles listening to another player, emboldening and colouring their chat.
+    aliases: [follow]
   listening:
     description: Lists the players being listened to.
+    aliases: [following]
 permissions:
   simsuf.*:
     default: op

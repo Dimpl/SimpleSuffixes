@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.WordUtils;
@@ -30,7 +31,7 @@ public class SimpleSuffixes extends JavaPlugin {
 	public String[] wordStafftags;
 	public String wordStafftagsString;
 	private final ChatListener chatListener = new ChatListener(this);
-	public static HashMap<Player, List<Player>> ListenedToBy = new HashMap<Player, List<Player>>();
+	public static Map<Player, List<Player>> ListenedToBy = new HashMap<Player, List<Player>>();
 	String RED = ChatColor.RED.toString();
 	
 	CommandSender Console;
@@ -55,6 +56,10 @@ public class SimpleSuffixes extends JavaPlugin {
 		PluginManager pm = getServer().getPluginManager();
 		pm.registerEvents(chatListener, this);
 		this.log.info(pdffile.getName() + " version " + pdffile.getVersion() + " is enabled.");
+		//for reloads, add all players into listener map
+		for (Player p:Bukkit.getOnlinePlayers())
+			ListenedToBy.put(p, new ArrayList<Player>());
+		
 	}
 	
 	@Override
@@ -132,7 +137,6 @@ public class SimpleSuffixes extends JavaPlugin {
 			sender.sendMessage(listening.toString());
 			return true;
 		}
-		
 		else return false;	
 	}
 	
@@ -218,7 +222,7 @@ public class SimpleSuffixes extends JavaPlugin {
 			if (allowed.toLowerCase().contains(blacklist))
 				return -1;
 		}
-		if (staff) {
+		if (!staff) {
 			for (String stafftags : wordStafftags) {
 				if (allowed.toLowerCase().contains(stafftags))
 					return -1;
