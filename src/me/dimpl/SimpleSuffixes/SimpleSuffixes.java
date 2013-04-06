@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.WordUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -57,7 +56,7 @@ public class SimpleSuffixes extends JavaPlugin {
 		pm.registerEvents(chatListener, this);
 		this.log.info(pdffile.getName() + " version " + pdffile.getVersion() + " is enabled.");
 		//for reloads, add all players into listener map
-		for (Player p:Bukkit.getOnlinePlayers())
+		for (Player p:getServer().getOnlinePlayers())
 			ListenedToBy.put(p, new ArrayList<Player>());
 		
 	}
@@ -67,6 +66,7 @@ public class SimpleSuffixes extends JavaPlugin {
 		//plugin disabled
 		PluginDescriptionFile pdffile = this.getDescription();
 		this.log.info(pdffile.getName() + " is now disabled.");
+		ListenedToBy.clear();
 	}
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
@@ -127,7 +127,7 @@ public class SimpleSuffixes extends JavaPlugin {
 			Player p2 = (Player) sender;
 			StringBuilder listening = new StringBuilder();
 			listening.append(ChatColor.GOLD + "You are listening to " + ChatColor.AQUA);
-			for (Player p1 : Bukkit.getOnlinePlayers()) {
+			for (Player p1 : getServer().getOnlinePlayers()) {
 				if (isListenedToBy(p1, p2))
 					listening.append(" " + p1.getDisplayName() + ",");
 			}
@@ -176,7 +176,7 @@ public class SimpleSuffixes extends JavaPlugin {
 				String cmd = cmd_fix.replace("%P", sender.getName());
 				cmd = cmd.replace("%M", strArgs);
 				log.info(cmd);
-				Bukkit.getServer().dispatchCommand(Console, cmd);
+				getServer().dispatchCommand(Console, cmd);
 				sender.sendMessage(ChatColor.AQUA + "Your " + type + "fix = \"" + strArgs + "\"");
 				return true;
 			}
@@ -205,7 +205,7 @@ public class SimpleSuffixes extends JavaPlugin {
 				String cmd = cmd_fix.replace("%P", player.getName());
 				cmd = cmd.replace("%M &f", "");
 				cmd = cmd.replace(" %M&f", "");
-				Bukkit.getServer().dispatchCommand(Console, cmd);
+				getServer().dispatchCommand(Console, cmd);
 				sender.sendMessage(ChatColor.AQUA + player.getName() + "'s " + type.substring(0, 3) + "fix has been reset.");
 				return true;
 			}
@@ -240,7 +240,7 @@ public class SimpleSuffixes extends JavaPlugin {
 	}
 	
 	public void removeListenedToBy(Player p2) {
-		for(Player p1:Bukkit.getOnlinePlayers()) {
+		for(Player p1: getServer().getOnlinePlayers()) {
 			if(ListenedToBy.get(p1).contains(p2))
 				ListenedToBy.get(p1).remove(p2);
 		}
