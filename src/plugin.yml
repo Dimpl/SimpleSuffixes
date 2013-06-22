@@ -1,7 +1,7 @@
 name: SimpleSuffixes
 main: me.dimpl.SimpleSuffixes.SimpleSuffixes
 author: Dimpl
-version: 1.4.1
+version: 1.5
 description: Allows non-op players to set their own prefix/suffix through PEX.
 commands:
   suffix:
@@ -22,6 +22,12 @@ commands:
   listening:
     description: Lists the players being listened to.
     aliases: [following]
+  initiate:
+    description: Sets a player as initiate.
+    aliases: [init]
+  initiates:
+    description: Lists the players who are initiates.
+    aliases: [inits]
 permissions:
   simsuf.*:
     default: op
@@ -31,5 +37,7 @@ permissions:
     description: Allows a player to set their own prefix.
   simsuf.r:
     description: Allows someone to reset another player's suffix/prefix.
+  simsuf.i:
+    description: Allows someone to set another player's prefix to initiate.
   simsuf.staff:
     description: Allows someone to use a staff title in their suffix/prefix.

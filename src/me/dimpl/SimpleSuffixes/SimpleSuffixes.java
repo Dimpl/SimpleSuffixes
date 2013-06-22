@@ -29,6 +29,8 @@ public class SimpleSuffixes extends JavaPlugin {
 	public String wordBlacklistString;
 	public String[] wordStafftags;
 	public String wordStafftagsString;
+	public String initiates;
+	public String inittag;
 	private final ChatListener chatListener = new ChatListener(this);
 	public static Map<Player, List<Player>> ListenedToBy = new HashMap<Player, List<Player>>();
 	String RED = ChatColor.RED.toString();
@@ -48,9 +50,13 @@ public class SimpleSuffixes extends JavaPlugin {
 		allowedRegexString = this.getConfig().getString("allowed-regex");
 		allowedRegex = allowedRegexString.split(" ");
 		wordBlacklistString = this.getConfig().getString("word-blacklist");
-		wordBlacklist = wordBlacklistString.split(", ");
+		wordBlacklist = wordBlacklistString.split(" ");
 		wordStafftagsString = this.getConfig().getString("word-stafftags");
-		wordStafftags = wordStafftagsString.split(", ");
+		wordStafftags = wordStafftagsString.split(" ");
+		initiates = this.getConfig().getString("initiates");
+		if (initiates == null)
+			initiates = "";
+		inittag = this.getConfig().getString("inittag");
 		//set up listener
 		PluginManager pm = getServer().getPluginManager();
 		pm.registerEvents(chatListener, this);
@@ -67,23 +73,25 @@ public class SimpleSuffixes extends JavaPlugin {
 		PluginDescriptionFile pdffile = this.getDescription();
 		this.log.info(pdffile.getName() + " is now disabled.");
 		ListenedToBy.clear();
+		this.getConfig().set("initiates", initiates);
+		this.saveConfig();
 	}
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
 		if (cmd.getName().equals("suffix")) {
-			return onCommandDo(sender, args, "suf", suffixCmd, sufMax);
+			return onCommandDo(sender, args, "suf", suffixCmd, sufMax, false);
 		}
 		
 		else if (cmd.getName().equals("prefix")) {
-			return onCommandDo(sender, args, "pre", prefixCmd, preMax);
+			return onCommandDo(sender, args, "pre", prefixCmd, preMax, false);
 		}
 		
 		else if (cmd.getName().equals("suffixr")) {
-			return onCommandDo(sender, args, "sufr", suffixCmd, 0);
+			return onCommandDo(sender, args, "sufr", suffixCmd, 0, false);
 		}
 		
 		else if (cmd.getName().equals("prefixr")) {
-			return onCommandDo(sender, args, "prer", prefixCmd, 0);
+			return onCommandDo(sender, args, "prer", prefixCmd, 0, false);
 		}
 		
 		else if (cmd.getName().equals("listen")) {
@@ -119,6 +127,7 @@ public class SimpleSuffixes extends JavaPlugin {
 			}
 			return false;
 		}
+		
 		else if (cmd.getName().equals("listening")) {
 			if (sender.getName() == "CONSOLE") {
 				sender.sendMessage(RED + "This command cannot be executed from the console.");				
@@ -137,12 +146,59 @@ public class SimpleSuffixes extends JavaPlugin {
 			sender.sendMessage(listening.toString());
 			return true;
 		}
-		else return false;	
+		
+		else if (cmd.getName().equals("initiate")) {
+			if (!sender.hasPermission("simsuf.i")) {
+				sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform that command.");				
+				return false;
+			}
+			if (args.length == 0) {
+				sender.sendMessage(RED + "Please specify a player to promote.");
+				return false;
+			}
+			else if (args.length >= 2) {
+				sender.sendMessage(RED + "Too many args.");
+				return false;
+			}
+			
+			Player player = getServer().getPlayer(args[0]);
+			if (player == null) {
+				sender.sendMessage(RED + "This player is offline.");
+				return false;
+			}
+			
+			if (!initiates.contains(player.getDisplayName())) {
+				initiates = initiates.concat(player.getDisplayName() + " ");
+				sender.sendMessage(ChatColor.DARK_GREEN + player.getDisplayName() + " is now an initiate!");
+				return onCommandDo(player, inittag.split(" "), "pre", prefixCmd, 0, true);
+			}
+			
+			else {
+				initiates = initiates.replaceAll(player.getDisplayName() + " ", "");
+				sender.sendMessage(ChatColor.BLUE + player.getDisplayName() + " is no longer an initiate!");
+				return onCommandDo(player, player.getDisplayName().split(" "), "prer", prefixCmd, 0 , true);
+			}
+		}
+		
+		else if (cmd.getName().equals("initiates")) {
+			if (!sender.hasPermission("simsuf.i")) {
+				sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform that command.");				
+				return false;
+			}
+			
+			String initiatess = initiates;
+			if (initiatess == "")
+				initiatess = "none";
+			sender.sendMessage(ChatColor.GRAY + "Initiates: " + initiatess);
+			return true;
+		}
+		
+		else return false;
 	}
 	
-	public boolean onCommandDo(CommandSender sender, String[] args, String type, String cmd_fix, Integer max) {
+	public boolean onCommandDo(CommandSender sender, String[] args, String type, String cmd_fix, Integer max, Boolean bypass) {
 		if (type == "pre" || type == "suf") {
-			if (!sender.hasPermission("simsuf." + type.substring(0, 1))) {
+			if (!sender.hasPermission("simsuf." + type.substring(0, 1)) && !bypass) {
 				sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform that command.");				
 				return false;
 			}
@@ -159,7 +215,7 @@ public class SimpleSuffixes extends JavaPlugin {
 			String strArgs = Arrays.toString(args);
 			strArgs = strArgs.substring(1, strArgs.length()-1).replaceAll(",", "");
 			
-			int length = Count(strArgs, sender.hasPermission("simsuf.staff"));
+			int length = Count(strArgs, sender.hasPermission("simsuf.staff"), bypass);
 			
 			//blacklisted word
 			if (length == -1) {
@@ -177,13 +233,14 @@ public class SimpleSuffixes extends JavaPlugin {
 				cmd = cmd.replace("%M", strArgs);
 				log.info(cmd);
 				getServer().dispatchCommand(Console, cmd);
-				sender.sendMessage(ChatColor.AQUA + "Your " + type + "fix = \"" + strArgs + "\"");
+				if (!bypass)
+					sender.sendMessage(ChatColor.AQUA + "Your " + type + "fix = \"" + strArgs + "\"");
 				return true;
 			}
 		}
 		
 		else if(type == "prer" || type == "sufr") {
-			if (!sender.hasPermission("simsuf.r")) {
+			if (!sender.hasPermission("simsuf.r") && !bypass) {
 				sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform that command.");				
 				return false;
 			}
@@ -206,14 +263,17 @@ public class SimpleSuffixes extends JavaPlugin {
 				cmd = cmd.replace("%M &f", "");
 				cmd = cmd.replace(" %M&f", "");
 				getServer().dispatchCommand(Console, cmd);
-				sender.sendMessage(ChatColor.AQUA + player.getName() + "'s " + type.substring(0, 3) + "fix has been reset.");
+				if (!bypass)
+					sender.sendMessage(ChatColor.AQUA + player.getName() + "'s " + type.substring(0, 3) + "fix has been reset.");
 				return true;
 			}
 		}
 		return false;
 	}
 	
-	public int Count(String string, Boolean staff) {
+	public int Count(String string, Boolean staff, Boolean bypass) {
+		if (bypass)
+			return 0;
 		//count extra chars in string
 		String allowed = string;
 		for (String regex : allowedRegex)
